@@ -1,0 +1,4 @@
+build
+.vscode
+*.swp
+node_modules
