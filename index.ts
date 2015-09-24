@@ -1,3 +1,5 @@
+/// <reference path='typings/bignumber.d.ts' />
+
 import Eth = require('./lib/eth');
 import Method = require('./lib/method');
 import Types = require('./lib/types');

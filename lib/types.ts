@@ -1,3 +1,5 @@
+import BigNumber = require("bignumber");
+
 export class Basic {
 	constructor(protected value: string) {}
 	toString() {
@@ -25,7 +27,7 @@ export class Address extends Hex {
 			throw new Error("Invalid length");
 		}
 	}	
-}
+}	
 
 export class BlockHash extends Hex {
 	constructor(hash: string);

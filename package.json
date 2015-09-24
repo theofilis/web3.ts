@@ -9,6 +9,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "bignumber.js": "debris/bignumber.js#master",
     "xmlhttprequest": "^1.7.0"
   }
 }
