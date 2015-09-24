@@ -8,14 +8,20 @@ export class Basic {
 }
 
 export class Hex extends Basic {
-	constructor(hex: string) {
-		if (hex.substr(0, 2) == "0x") {
-			hex = hex.substr(2);
-		}
-		super(hex);
-		let matches = this.value.match(/[0-9a-f]*/gi);
-		if (matches.length < 1 || matches[0].length != this.value.length) {
-			throw new Error("Invalid hex");
+	constructor(hex: string);
+	constructor(hex: number);
+	constructor(hex: any) {
+		if (typeof hex == "string") {
+			if (hex.substr(0, 2) == "0x") {
+				hex = hex.substr(2);
+			}
+			super(hex);
+			let matches = this.value.match(/[0-9a-f]*/gi);
+			if (matches.length < 1 || matches[0].length != this.value.length) {
+				throw new Error("Invalid hex");
+			}
+		} else if (typeof hex === "number") {
+			super(hex.toString(16));
 		}
 	}
 
@@ -59,15 +65,26 @@ export class BlockHash extends Hex {
 }
 
 export class BlockNumber extends Hex {
+	private static special = {"latest": true, "earliest": true, "pending": true};
+	private special: string;
 	constructor(block: string);
 	constructor(block: number);
-	constructor(block: any) {
+	constructor(block: any = "latest") {
 		if (typeof block === "string") {
-			super(block);
+			if (BlockNumber.special[block]){
+				this.special = block;
+				super(0); 
+			} else {
+				super(block);
+			}
 		}
 		else if (typeof block === "number") {
-			super(block.toString(16));
+			super(block);
 		} 
+	}
+	
+	toString() {
+		return this.special ? this.special : "0x" + this.value;
 	}
 }
 

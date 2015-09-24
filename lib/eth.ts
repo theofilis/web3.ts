@@ -4,17 +4,23 @@ import Protocol = require('./protocol');
 import Provider = require('./provider');
 import Settings = require('./settings');
 
-export class Eth {
-	constructor(private settings: Settings.Settings) {}
+export class Face {
+	constructor(protected settings: Settings.Settings) {}
 	
-	private send(method: string, params: [any], format: (result: any) => any, callback?: (error: string, result: any) => void): any {
+	protected send(
+		method: string, 
+		params: any[], 
+		format: (result: any) => any, 
+		callback?: (error: string, result: any) => void
+	): any {
 		let payload = this.settings.getProtocol().toPayload(method, params);
 		let async = !!callback;
 		if (async) {
-			this.settings.getProvider().send(payload, (error: string, result: string) => {
+			this.settings.getProvider().send(payload, (error: string, response: string) => {
 				if (error) {
 					callback(error, null);
 				} else {
+					var result = this.settings.getProtocol().getResult(response);
 					callback(null, format(result));	
 				}
 			});
@@ -25,12 +31,42 @@ export class Eth {
 		}
 	}
 	
-	getBalance(address: Types.Address): Types.Wei;
-	getBalance(address: Types.Address, callback: (error: string, result: Types.Wei) => void): void;
-	getBalance(address: Types.Address, callback?: any): any {
-		return this.send('eth_getBalance', [address.toString()], function (result: string) {
+	protected getParams(params: any[]): any[] {
+		return params.filter(function (p: any) {
+			return typeof p !== "function" && typeof p !== "undefined";
+		}).map(function (p: any) {
+			return p instanceof Types.Basic ? p.toString() : p;
+		})
+	}
+	
+	protected getCallback(params: any[]): any {
+		return params.filter(function (p: any) {
+			return typeof p === "function";
+		})[0];
+	}
+}
+
+export class Eth extends Face {
+	
+	getBalance(
+		address: Types.Address,
+		block?: Types.BlockNumber
+	): Types.Wei;
+	getBalance(
+		address: Types.Address,
+		block: Types.BlockNumber,
+		callback: (error: string, result: Types.Wei) => void
+	): void;
+	getBalance(
+		address: Types.Address,
+		callback: (error: string, result: Types.Wei) => void
+	): void;
+	getBalance(address: Types.Address, block?: any, callback?: any): any {
+		var params = this.getParams([address, block]);
+		var cb = this.getCallback([block, callback]);
+		return this.send('eth_getBalance', params, function (result: string) {
 			return new Types.Wei(result, 'wei');
-		}, callback);
+		}, cb);
 	}
 	
 	accounts(): [Types.Address];
@@ -82,4 +118,60 @@ export class Eth {
 			return new Types.BlockNumber(result);
 		}, callback);
 	}
+	
+	getStorageAt(
+		address: Types.Address,
+		position: Types.Hex,
+		block?: Types.BlockNumber
+	): Types.Hex;
+	getStorageAt(
+		address: Types.Address,
+		position: Types.Hex,
+		block: Types.BlockNumber,
+		callback: (error: string, result: Types.Hex) => void
+	): void;
+	getStorageAt(
+		address: Types.Address,
+		position: Types.Hex,
+		callback: (error: string, result: Types.Hex) => void
+	): void;
+	getStorageAt(
+		address: Types.Address,
+		position: Types.Hex,
+		block?: any,
+		callback?: any
+	): any {
+		var params = this.getParams([address, position, block]);
+		var cb = this.getCallback([block, callback]);
+		return this.send('eth_getStorageAt', params, function (result: string) {
+			return new Types.Hex(result);
+		}, cb);
+	}
+	
+	getTransactionCount(
+		address: Types.Address,
+		block?: Types.BlockNumber
+	): Types.Hex;
+	getTransactionCount(
+		address: Types.Address,
+		block: Types.BlockNumber,
+		callback: (error: string, result: Types.Hex) => void
+	): void;
+	getTransactionCount(
+		address: Types.Address,
+		callback: (error: string, result: Types.Hex) => void
+	): void;
+	getTransactionCount(
+		address: Types.Address,
+		block?: any,
+		callback?: any
+	): any {
+		var params = this.getParams([address, block]);
+		var cb = this.getCallback([block, callback]);
+		return this.send('eth_getTransactionCount', params, function (result: string) {
+			return new Types.Hex(result);
+		}, cb);
+	}
+	
+	
 }
