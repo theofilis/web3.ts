@@ -1,4 +1,4 @@
-import BigNumber = require("bignumber");
+import BigNumber = require("bignumber.js");
 
 export class Basic {
 	constructor(protected value: string) {}

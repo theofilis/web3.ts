@@ -1,4 +1,5 @@
 /// <reference path='typings/bignumber.d.ts' />
+/// <reference path='typings/xmlhttprequest.d.ts' />
 
 import Eth = require('./lib/eth');
 import Method = require('./lib/method');

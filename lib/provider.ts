@@ -1,3 +1,6 @@
+import xmlhttprequest = require("xmlhttprequest");	
+var XMLHttpRequest = xmlhttprequest.XMLHttpRequest;	
+
 export interface Provider {
 	send(payload: string, callback?: (error: string, result: string) => void): any;
 }
@@ -8,8 +11,8 @@ export class Http implements Provider {
 	send(payload: string, callback?: (error: string, result: string) => void): any {
 		let async: boolean = !!callback;
 		let request = new XMLHttpRequest();
-		request.open('POST', this.host, async);		
-		request.setRequestHeader('Content-Type', 'application/json');
+		request.open("POST", this.host, async);		
+		request.setRequestHeader("Content-Type", "application/json");
 		
 		if (async) {
 			request.onreadystatechange = function () {
