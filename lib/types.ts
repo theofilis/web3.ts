@@ -13,10 +13,15 @@ export class Hex extends Basic {
 			hex = hex.substr(2);
 		}
 		super(hex);
-		let matches = this.value.match(/[0-9a-f]*/gi)[0];
+		let matches = this.value.match(/[0-9a-f]*/gi);
 		if (matches.length < 1 || matches[0].length != this.value.length) {
 			throw new Error("Invalid hex");
 		}
+	}
+
+	toString(base: number = 16) {
+		var b = new BigNumber(this.value, 16);
+		return b.toString(base);
 	}
 }
 
@@ -26,7 +31,11 @@ export class Address extends Hex {
 		if (this.value.length != 40) {
 			throw new Error("Invalid length");
 		}
-	}	
+	}
+	
+	toString() {
+		return "0x" + this.value;
+	}
 }	
 
 export class BlockHash extends Hex {
@@ -43,6 +52,10 @@ export class BlockHash extends Hex {
 			throw new Error("Invalid length");
 		}
 	}
+	
+	toString() {
+		return "0x" + this.value;
+	}
 }
 
 export class BlockNumber extends Hex {
@@ -58,8 +71,8 @@ export class BlockNumber extends Hex {
 	}
 }
 
-export class Ether extends Basic {
-	private factor(base: string): number {
+export class Wei extends Hex {
+	private factor(base: string): BigNumber {
 		var f: number = 0;
 		switch (base) {
 			case "wei": f = 0; break;
@@ -89,13 +102,16 @@ export class Ether extends Basic {
 			default: throw new Error("Invalid base!");
 		}
 		
-		return Math.pow(10, f);
+		return new BigNumber(10).pow(f);
 	}
 	
 	constructor(amount: string, base: string);
 	constructor(amount: number, base: string);
+	constructor(amount: BigNumber, base: string);
 	constructor(amount: any, base: string) {
-		super(amount);
+		var b = new BigNumber(amount, 16);
+		var wei = b.times(this.factor(base));
+		super(wei.toString(16));
 	}
 }
 
